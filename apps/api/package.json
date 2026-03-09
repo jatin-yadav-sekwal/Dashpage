@@ -1,0 +1,29 @@
+{
+    "name": "api",
+    "module": "src/index.ts",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "bun run --watch src/index.ts",
+        "build": "bun build src/index.ts --outdir ./dist --target bun",
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "drizzle-kit migrate",
+        "db:seed": "bun run src/db/seed-themes.ts"
+    },
+    "dependencies": {
+        "@hono/zod-validator": "^0.7.6",
+        "@supabase/supabase-js": "^2.95.3",
+        "drizzle-orm": "^0.45.1",
+        "hono": "^4.11.7",
+        "postgres": "^3.4.8",
+        "zod": "^4.3.6"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "dotenv": "^17.2.3",
+        "drizzle-kit": "^0.31.8"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    }
+}
