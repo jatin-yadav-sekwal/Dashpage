@@ -27,7 +27,6 @@ import {
     Palette,
     Sparkles,
     Eye,
-    Edit3,
     CheckCircle,
     Bookmark,
     ChevronRight
@@ -133,12 +132,7 @@ export default function Dashboard() {
                         animate={{ opacity: 1 }}
                         className="flex flex-col sm:flex-row items-center sm:items-start gap-6"
                     >
-                        <div className="relative group">
-                            <AvatarUpload />
-                            <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <Edit3 className="w-6 h-6 text-white" />
-                            </div>
-                        </div>
+                        <AvatarUpload />
                         <div className="text-center sm:text-left space-y-3">
                             <div className="flex items-center gap-3 justify-center sm:justify-start">
                                 <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
