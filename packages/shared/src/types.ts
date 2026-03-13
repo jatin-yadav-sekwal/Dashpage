@@ -14,6 +14,8 @@ export interface Profile {
   avatarUrl: string | null;
   email: string;
   phone: string | null;
+  dateOfBirth: string | null;
+  profession: string | null;
   location: string | null;
   socialLinks: SocialLinks;
   themeId: string | null;
@@ -36,6 +38,8 @@ export interface SocialLinks {
 export interface CreateProfileInput {
   username: string;
   fullName: string;
+  dateOfBirth?: string;
+  profession?: string;
   tagline?: string;
   bio?: string;
   email: string;
@@ -46,6 +50,8 @@ export interface CreateProfileInput {
 
 export interface UpdateProfileInput {
   fullName?: string;
+  dateOfBirth?: string | null;
+  profession?: string | null;
   tagline?: string;
   bio?: string;
   email?: string;
@@ -124,9 +130,11 @@ export interface ThemeConfig {
     heading: string;
     body: string;
   };
-  layout: "modern" | "classic" | "minimal" | "bold";
-  borderRadius: "none" | "sm" | "md" | "lg" | "full";
-  heroStyle: "centered" | "split" | "left-aligned";
+  borderRadius: string;
+  heroStyle: "split" | "centered" | "minimal" | "creative";
+  experienceStyle: "timeline" | "cards" | "minimal";
+  educationStyle: "timeline" | "cards" | "minimal";
+  projectsStyle: "grid" | "cards" | "list" | "masonry";
 }
 
 // === Bookmark ===

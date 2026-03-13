@@ -27,6 +27,8 @@ export const profiles = pgTable(
     avatarUrl: text("avatar_url"),
     email: text("email").notNull(),
     phone: text("phone"),
+    dateOfBirth: date("date_of_birth"),
+    profession: text("profession"),
     location: text("location"),
     socialLinks: jsonb("social_links").default({}).$type<Record<string, string>>(),
     themeId: uuid("theme_id"),
@@ -137,9 +139,12 @@ export const themes = pgTable(
         accent: string;
       };
       fonts: { heading: string; body: string };
-      layout: string;
       borderRadius: string;
-      heroStyle: string;
+      // Section-specific styles
+      heroStyle: "split" | "centered" | "minimal" | "creative";
+      experienceStyle: "timeline" | "cards" | "minimal";
+      educationStyle: "timeline" | "cards" | "minimal";
+      projectsStyle: "grid" | "list" | "cards" | "masonry";
     }>(),
     isPremium: boolean("is_premium").default(false).notNull(),
     price: integer("price"), // in paisa (₹)

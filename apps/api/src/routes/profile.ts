@@ -12,8 +12,8 @@ const profileRoutes = new Hono<Env>();
 // PUBLIC ROUTES
 // ============================================
 
-/** GET /profiles/:username — public profile page data */
-profileRoutes.get("/:username", async (c) => {
+/** GET /api/profiles/:username — public profile page data */
+profileRoutes.get("/profiles/:username", async (c) => {
   const { username } = c.req.param();
   const profile = await profileService.getByUsername(username);
 

@@ -26,8 +26,8 @@ export default function Signup() {
         if (error) {
             toast.error(error.message);
         } else {
-            toast.success("Account created! Check your email to verify.");
-            navigate("/dashboard");
+            toast.success("Account created! Please complete your profile.");
+            navigate("/onboarding");
         }
     };
 
@@ -35,7 +35,7 @@ export default function Signup() {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
-                redirectTo: `${window.location.origin}/dashboard`,
+                redirectTo: `${window.location.origin}/onboarding`,
             },
         });
 

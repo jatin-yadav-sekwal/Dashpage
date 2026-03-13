@@ -43,6 +43,8 @@ CREATE TABLE "profiles" (
 	"avatar_url" text,
 	"email" text NOT NULL,
 	"phone" text,
+	"date_of_birth" date,
+	"profession" text,
 	"location" text,
 	"social_links" jsonb DEFAULT '{}'::jsonb,
 	"theme_id" uuid,

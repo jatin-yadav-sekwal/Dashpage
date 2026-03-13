@@ -1,13 +1,27 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { useMyProfile } from "@/features/profile/hooks/useProfile";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { data: profileData } = useMyProfile();
+    const location = useLocation();
+
+    // Get the redirect location from state or default to dashboard
+    const from = location.state?.from || "/dashboard";
+
+    useEffect(() => {
+        if (profileData?.hasProfile === false) {
+            navigate("/onboarding");
+        } else if (profileData?.hasProfile === true) {
+            navigate(from);
+        }
+    }, [profileData, navigate, from]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,7 +38,11 @@ export default function Login() {
             toast.error(error.message);
         } else {
             toast.success("Welcome back!");
-            navigate("/dashboard");
+            if (profileData?.hasProfile === false) {
+                navigate("/onboarding");
+            } else {
+                navigate(from);
+            }
         }
     };
 
@@ -32,7 +50,7 @@ export default function Login() {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
-                redirectTo: `${window.location.origin}/dashboard`,
+                redirectTo: `${window.location.origin}${from}`,
             },
         });
 

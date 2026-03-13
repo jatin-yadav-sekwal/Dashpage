@@ -20,9 +20,10 @@ async function fetchWithAuth(endpoint: string, options: FetchOptions = {}) {
     headers["Authorization"] = `Bearer ${session.access_token}`;
   }
 
-  // Handle potential double slashes
-  const url = `${API_BASE}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
-
+  // Handle potential double slashes and ensure proper path construction
+  const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = `${API_BASE}/api${path}`;
+  
   const response = await fetch(url, {
     ...options,
     headers,
@@ -37,12 +38,12 @@ async function fetchWithAuth(endpoint: string, options: FetchOptions = {}) {
 }
 
 export const api = {
-  get: (endpoint: string) => fetchWithAuth(endpoint, { method: "GET" }),
-  post: (endpoint: string, body?: unknown) =>
-    fetchWithAuth(endpoint, { method: "POST", body: JSON.stringify(body) }),
-  patch: (endpoint: string, body?: unknown) =>
-    fetchWithAuth(endpoint, { method: "PATCH", body: JSON.stringify(body) }),
-  put: (endpoint: string, body?: unknown) =>
-    fetchWithAuth(endpoint, { method: "PUT", body: JSON.stringify(body) }),
-  delete: (endpoint: string) => fetchWithAuth(endpoint, { method: "DELETE" }),
+  get: <T = any>(endpoint: string) => fetchWithAuth(endpoint, { method: "GET" }) as Promise<T>,
+  post: <T = any>(endpoint: string, body?: unknown, useAuth = true) =>
+    (useAuth ? fetchWithAuth : fetch)(endpoint, { method: "POST", body: JSON.stringify(body), headers: { "Content-Type": "application/json" } }) as Promise<T>,
+  patch: <T = any>(endpoint: string, body?: unknown) =>
+    fetchWithAuth(endpoint, { method: "PATCH", body: JSON.stringify(body) }) as Promise<T>,
+  put: <T = any>(endpoint: string, body?: unknown) =>
+    fetchWithAuth(endpoint, { method: "PUT", body: JSON.stringify(body) }) as Promise<T>,
+  delete: <T = any>(endpoint: string) => fetchWithAuth(endpoint, { method: "DELETE" }) as Promise<T>,
 };

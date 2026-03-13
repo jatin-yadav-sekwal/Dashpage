@@ -12,7 +12,18 @@ export type Env = {
     username: string | null;
     hasProfile: boolean;
   };
+  Bindings: {
+    DATABASE_URL: string;
+    FRONTEND_URL: string;
+    CORS_ORIGIN: string;
+    RAZORPAY_KEY_ID: string;
+    RAZORPAY_KEY_SECRET: string;
+    RAZORPAY_WEBHOOK_SECRET: string;
+  };
 };
+
+export type Variables = Env["Variables"];
+export type Bindings = Env["Bindings"];
 
 export const authMiddleware = createMiddleware<Env>(async (c, next) => {
   const authHeader = c.req.header("Authorization");

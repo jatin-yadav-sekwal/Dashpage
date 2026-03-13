@@ -1,5 +1,5 @@
 {
-  "id": "9dc37ff7-7ce7-4535-a834-c55da796310d",
+  "id": "8d577ebb-7635-4321-b52c-e25b34bd042d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -421,6 +421,18 @@
         },
         "phone": {
           "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_of_birth": {
+          "name": "date_of_birth",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profession": {
+          "name": "profession",
           "type": "text",
           "primaryKey": false,
           "notNull": false
