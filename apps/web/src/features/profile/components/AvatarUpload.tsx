@@ -1,37 +1,72 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useUploadAvatar, useMyProfile } from "../hooks";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { compressAvatar, validateAvatarFile, createPreviewUrl, revokePreviewUrl } from "@/lib/imageCompression";
 
 export function AvatarUpload() {
     const { data: profileData } = useMyProfile();
     const uploadAvatar = useUploadAvatar();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const profile = profileData?.data;
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        if (file.size > 2 * 1024 * 1024) {
-            toast.error("Image must be less than 2MB");
+        // Validate file
+        const validation = validateAvatarFile(file);
+        if (!validation.valid) {
+            toast.error(validation.error);
             return;
         }
 
-        if (!file.type.startsWith("image/")) {
-            toast.error("File must be an image");
-            return;
-        }
+        // Show loading state
+        toast.info("Compressing image...");
 
-        uploadAvatar.mutate(file, {
-            onSuccess: () => {
-                toast.success("Avatar updated!");
-            },
-            onError: (err) => {
-                toast.error(err.message || "Failed to upload avatar");
-            },
-        });
+        try {
+            // Compress the image
+            const compressedBlob = await compressAvatar(file);
+            
+            // Create a new file from the compressed blob
+            const compressedFile = new File(
+                [compressedBlob],
+                file.name.replace(/\.[^/.]+$/, ".jpg"), // Change extension to .jpg
+                { type: "image/jpeg" }
+            );
+
+            // Update preview immediately
+            if (previewUrl) {
+                revokePreviewUrl(previewUrl);
+            }
+            const newPreviewUrl = createPreviewUrl(compressedFile);
+            setPreviewUrl(newPreviewUrl);
+
+            // Upload the compressed file
+            uploadAvatar.mutate(compressedFile, {
+                onSuccess: () => {
+                    toast.success("Avatar updated!");
+                    // Revoke preview URL after successful upload
+                    if (previewUrl) {
+                        revokePreviewUrl(previewUrl);
+                    }
+                    setPreviewUrl(null);
+                },
+                onError: (err) => {
+                    toast.error(err.message || "Failed to upload avatar");
+                    // Revoke preview URL on error
+                    if (previewUrl) {
+                        revokePreviewUrl(previewUrl);
+                    }
+                    setPreviewUrl(null);
+                },
+            });
+        } catch (error) {
+            toast.error("Failed to compress image");
+            console.error("Compression error:", error);
+        }
     };
 
     if (!profile) return null;
@@ -40,11 +75,18 @@ export function AvatarUpload() {
         ? profile.fullName.substring(0, 2).toUpperCase()
         : profile.username?.substring(0, 2).toUpperCase() || "?";
 
+    // Use preview URL if available, otherwise use profile avatar
+    const displayUrl = previewUrl || profile.avatarUrl || "";
+
     return (
         <div className="flex flex-col items-center gap-4">
             <div className="relative group">
                 <Avatar className="w-24 h-24 sm:w-32 sm:h-32 shadow-sm border">
-                    <AvatarImage src={profile.avatarUrl || ""} alt={profile.fullName || "Avatar"} className="object-cover" />
+                    <AvatarImage 
+                        src={displayUrl} 
+                        alt={profile.fullName || "Avatar"} 
+                        className="object-cover" 
+                    />
                     <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
                 </Avatar>
 
