@@ -2,6 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { Experience, CreateExperienceInput, UpdateExperienceInput } from "@shared/types";
 
+// Cache configuration for experiences data
+const STALE_TIME = 1000 * 60 * 3; // 3 minutes
+const CACHE_TIME = 1000 * 60 * 10; // 10 minutes
+
 export function useMyExperiences() {
   return useQuery({
     queryKey: ["myExperiences"],
@@ -9,6 +13,8 @@ export function useMyExperiences() {
       const response = await api.get("/me/experiences");
       return response.data as Experience[];
     },
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 }
 

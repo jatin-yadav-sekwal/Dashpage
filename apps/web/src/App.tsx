@@ -10,6 +10,7 @@ import Dashboard from "@/pages/Dashboard";
 import ProfilePage from "@/pages/ProfilePage";
 import Themes from "@/pages/Themes";
 import Bookmarks from "@/pages/Bookmarks";
+import NotFound from "@/pages/NotFound";
 
 function App() {
     return (
@@ -61,6 +62,9 @@ function App() {
 
                     {/* Public Profile (username-based URL) */}
                     <Route path="/:username" element={<ProfilePage />} />
+                    
+                    {/* 404 - Not Found */}
+                    <Route path="*" element={<NotFound />} />
                 </Routes>
             </main>
             {/* <Footer /> */}

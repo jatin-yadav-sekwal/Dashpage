@@ -1,6 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
+// Cache configuration for bookmarks
+const STALE_TIME = 1000 * 60 * 2; // 2 minutes
+const CACHE_TIME = 1000 * 60 * 5; // 5 minutes
+
 export interface BookmarkData {
   id: string;
   userId: string;
@@ -16,13 +20,16 @@ export interface BookmarkData {
   };
 }
 
-export function useMyBookmarks() {
+export function useMyBookmarks(enabled: boolean = true) {
   return useQuery({
     queryKey: ["myBookmarks"],
     queryFn: async () => {
       const response = await api.get<{ data: BookmarkData[] }>("/me/bookmarks/");
       return response;
     },
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
+    enabled, // Only run query when enabled
   });
 }
 
@@ -55,8 +62,8 @@ export function useRemoveBookmark() {
 }
 
 // Combined hook for bookmark button component
-export function useBookmark() {
-  const { data: bookmarksResp } = useMyBookmarks();
+export function useBookmark(enabled: boolean = true) {
+  const { data: bookmarksResp } = useMyBookmarks(enabled);
   const addMutation = useAddBookmark();
   const removeMutation = useRemoveBookmark();
 

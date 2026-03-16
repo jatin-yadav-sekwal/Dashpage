@@ -2,14 +2,14 @@ import { useMyProfile, useUpdateProfile } from "../hooks";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Globe } from "lucide-react";
+import { Globe, Loader2 } from "lucide-react";
 
 export function PublishToggle() {
-    const { data: profileData } = useMyProfile();
+    const { data: profileData, isLoading } = useMyProfile();
     const updateProfile = useUpdateProfile();
     const profile = profileData?.data;
 
-    const handleToggle = (checked: boolean) => {
+    const handleToggle = async (checked: boolean) => {
         if (checked && !profile?.fullName) {
             toast.error("Please add your Full Name before publishing");
             return;
@@ -21,18 +21,28 @@ export function PublishToggle() {
             }
         }
 
-        updateProfile.mutate(
-            { isPublished: checked },
-            {
-                onSuccess: () => {
-                    toast.success(checked ? "Profile published!" : "Profile unpublished.");
-                },
-                onError: (err) => toast.error(err.message),
-            }
-        );
+        try {
+            await updateProfile.mutateAsync({ isPublished: checked });
+            toast.success(checked ? "Profile published!" : "Profile unpublished.");
+        } catch (error: any) {
+            console.error("Publish error:", error);
+            toast.error(error?.message || "Failed to update profile. Please try again.");
+        }
     };
 
-    if (!profile) return null;
+    if (isLoading || !profile) {
+        return (
+            <div className="flex items-center gap-4 bg-muted/50 p-3 rounded-lg border animate-pulse">
+                <div className="bg-primary/10 p-2 rounded-full">
+                    <Globe className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                    <div className="h-4 bg-muted rounded w-32 mb-2"></div>
+                    <div className="h-3 bg-muted rounded w-24"></div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex items-center gap-4 bg-muted/50 p-3 rounded-lg border">
@@ -53,6 +63,7 @@ export function PublishToggle() {
                 onCheckedChange={handleToggle}
                 disabled={updateProfile.isPending}
             />
+            {updateProfile.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
         </div>
     );
 }

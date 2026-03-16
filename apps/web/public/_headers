@@ -1,0 +1,18 @@
+# Cloudflare Pages Headers Configuration
+# https://developers.cloudflare.com/pages/platform/headers/
+
+# Cache static assets for 1 year
+/static/*
+  Cache-Control: public, max-age=31536000, s-maxage=31536000
+
+# Cache API responses based on their Cache-Control headers
+/api/*
+  Cache-Control: public, max-age=0, s-maxage=60
+
+# Cache index.html for offline access
+/index.html
+  Cache-Control: public, max-age=0, s-maxage=3600
+
+# Enable CORS
+/*
+  Access-Control-Allow-Origin: *

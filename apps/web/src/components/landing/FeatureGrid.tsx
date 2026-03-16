@@ -80,7 +80,7 @@ export function FeatureGrid() {
     ];
 
     return (
-        <section className="py-24 bg-white relative">
+        <section id="features" className="py-24 bg-white relative">
             <div className="max-w-6xl mx-auto px-6 mb-12">
                 <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Features</h2>
                 <p className="text-slate-600 mt-2">Everything you need to showcase your work</p>

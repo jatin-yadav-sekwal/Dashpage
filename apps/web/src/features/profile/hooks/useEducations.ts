@@ -2,6 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { Education, CreateEducationInput, UpdateEducationInput } from "@shared/types";
 
+// Cache configuration for education data
+const STALE_TIME = 1000 * 60 * 3; // 3 minutes
+const CACHE_TIME = 1000 * 60 * 10; // 10 minutes
+
 export function useMyEducations() {
   return useQuery({
     queryKey: ["myEducations"],
@@ -9,6 +13,8 @@ export function useMyEducations() {
       const response = await api.get("/me/educations");
       return response.data as Education[];
     },
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 }
 

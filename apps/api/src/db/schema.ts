@@ -39,6 +39,7 @@ export const profiles = pgTable(
   (table) => [
     uniqueIndex("profiles_username_idx").on(table.username),
     index("profiles_user_id_idx").on(table.userId),
+    index("profiles_username_published_idx").on(table.username, table.isPublished),
   ]
 );
 

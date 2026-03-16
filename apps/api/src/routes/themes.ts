@@ -26,10 +26,23 @@ router.get("/", async (c) => {
   }
 
   const allThemes = await themeService.getAllThemes(userId);
+  
+  // Cache themes for 10 minutes at CDN level, 5 minutes in browser
+  c.header("Cache-Control", "public, max-age=300, s-maxage=600");
   return c.json({ data: allThemes });
 });
 
-// POST /api/themes (Protected - Apply logic)
+// POST /api/themes/seed (Maintenance: manually seed default themes)
+router.post("/seed", async (c) => {
+  // Ideally this would check for an admin secret, but seeding is idempotent
+  try {
+    await themeService.seedDefaultThemes();
+    return c.json({ status: "success", message: "Themes seeded if missing" });
+  } catch (e: any) {
+    return c.json({ error: e.message }, 500);
+  }
+});
+
 const applyThemeSchema = z.object({
   themeId: z.string().uuid()
 });

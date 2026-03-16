@@ -2,6 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { Project, CreateProjectInput, UpdateProjectInput } from "@shared/types";
 
+// Cache configuration for projects data
+const STALE_TIME = 1000 * 60 * 3; // 3 minutes
+const CACHE_TIME = 1000 * 60 * 10; // 10 minutes
+
 export function useMyProjects() {
   return useQuery({
     queryKey: ["myProjects"],
@@ -9,6 +13,8 @@ export function useMyProjects() {
       const response = await api.get("/me/projects");
       return response.data as Project[];
     },
+    staleTime: STALE_TIME,
+    gcTime: CACHE_TIME,
   });
 }
 

@@ -1,10 +1,13 @@
 import { decode } from "hono/jwt";
 
-// JWKS URL from environment — points to your Supabase project
-const getJwksUrl = () => {
-  const url = process.env.SUPABASE_JWKS_URL;
-  if (!url) throw new Error("SUPABASE_JWKS_URL is missing");
-  return url;
+// Use fallback JWKS URL for Cloudflare Workers
+const getJwksUrl = (): string => {
+  // Try environment variable first
+  const envUrl = (globalThis as any).SUPABASE_JWKS_URL || process?.env?.SUPABASE_JWKS_URL;
+  if (envUrl) return envUrl;
+  
+  // Fallback to hardcoded Supabase URL
+  return "https://pwxcyrnwhphtdibkswnl.supabase.co/auth/v1/.well-known/jwks.json";
 };
 
 // Cache keys in memory: Kid -> CryptoKey

@@ -7,7 +7,7 @@
     ],
     "scripts": {
         "dev:api": "cd apps/api && bun run dev",
-        "dev:web": "cd apps/web && bun run dev",
+        "dev:web": "cd apps/web-v2 && npm run dev",
         "dev": "bun run dev:api & bun run dev:web",
         "db:generate": "cd apps/api && bun run db:generate",
         "db:migrate": "cd apps/api && bun run db:migrate"

@@ -27,7 +27,7 @@ export default function Login() {
         e.preventDefault();
         setLoading(true);
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
         });
@@ -36,7 +36,7 @@ export default function Login() {
 
         if (error) {
             toast.error(error.message);
-        } else {
+        } else if (data.session) {
             toast.success("Welcome back!");
             if (profileData?.hasProfile === false) {
                 navigate("/onboarding");
@@ -50,7 +50,7 @@ export default function Login() {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
-                redirectTo: `${window.location.origin}${from}`,
+                redirectTo: `${window.location.origin}/dashboard`,
             },
         });
 

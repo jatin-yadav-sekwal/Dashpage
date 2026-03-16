@@ -29,6 +29,10 @@ export interface Theme {
   price: number | null;
 }
 
+// Fetch all themes - themes don't change often, cache longer
+const THEME_STALE_TIME = 1000 * 60 * 10; // 10 minutes
+const THEME_CACHE_TIME = 1000 * 60 * 30; // 30 minutes
+
 // Fetch all themes
 export function useThemes() {
   return useQuery({
@@ -37,6 +41,8 @@ export function useThemes() {
       const res = await api.get<{ data: Theme[] }>("/themes");
       return res.data;
     },
+    staleTime: THEME_STALE_TIME,
+    gcTime: THEME_CACHE_TIME,
   });
 }
 
@@ -50,8 +56,9 @@ export function useApplyTheme() {
       return res.data;
     },
     onSuccess: () => {
-      // Invalidate profile query to refetch updated theme
+      // Invalidate both myProfile (dashboard) and all public profile queries
       queryClient.invalidateQueries({ queryKey: ["myProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
   });
 }
@@ -111,7 +118,9 @@ export function useBuyPremiumTheme() {
       });
     },
     onSuccess: () => {
+      // Invalidate both myProfile (dashboard) and all public profile queries
       queryClient.invalidateQueries({ queryKey: ["myProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
   });
 }

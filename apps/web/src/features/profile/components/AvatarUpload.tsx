@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useUploadAvatar, useMyProfile } from "../hooks";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Loader2 } from "lucide-react";
@@ -11,6 +11,19 @@ export function AvatarUpload() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const profile = profileData?.data;
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (profile?.avatarUrl) {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'image';
+            link.href = profile.avatarUrl;
+            document.head.appendChild(link);
+            return () => {
+                document.head.removeChild(link);
+            };
+        }
+    }, [profile?.avatarUrl]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -69,7 +82,13 @@ export function AvatarUpload() {
         }
     };
 
-    if (!profile) return null;
+    if (!profile) {
+        return (
+            <div className="flex flex-col items-center gap-4">
+                <div className="avatar-skeleton animate-pulse" />
+            </div>
+        );
+    }
 
     const initials = profile.fullName
         ? profile.fullName.substring(0, 2).toUpperCase()
@@ -85,9 +104,12 @@ export function AvatarUpload() {
                     <AvatarImage 
                         src={displayUrl} 
                         alt={profile.fullName || "Avatar"} 
-                        className="object-cover" 
+                        className="object-cover"
+                        width={128}
+                        height={128}
+                        fetchPriority="high"
                     />
-                    <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
+                    <AvatarFallback className="text-2xl" delayMs={0}>{initials}</AvatarFallback>
                 </Avatar>
 
                 <div

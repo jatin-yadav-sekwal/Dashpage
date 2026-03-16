@@ -25,7 +25,9 @@ export function ProfileNavbar({ username, fullName, avatarUrl, themeColors, prof
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user } = useAuth();
     const navigate = useNavigate();
-    const { toggleBookmark, isBookmarked } = useBookmark();
+    
+    // Only enable bookmark query when user is logged in
+    const { toggleBookmark, isBookmarked } = useBookmark(!!user);
 
     // Use local state for bookmark status
     const [localIsBookmarked, setLocalIsBookmarked] = useState(initialIsBookmarked);

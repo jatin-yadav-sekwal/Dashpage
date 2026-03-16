@@ -25,12 +25,20 @@ function Avatar({
 
 function AvatarImage({
   className,
+  width,
+  height,
+  fetchPriority,
   ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+}: React.ComponentProps<typeof AvatarPrimitive.Image> & { width?: number; height?: number; fetchPriority?: "high" | "low" | "auto" }) {
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
-      className={cn("aspect-square size-full", className)}
+      className={cn("aspect-square size-full object-cover", className)}
+      loading="lazy"
+      decoding="async"
+      width={width || 40}
+      height={height || 40}
+      fetchPriority={fetchPriority || "auto"}
       {...props}
     />
   )

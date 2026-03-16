@@ -2,6 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { Profile, CreateProfileInput, UpdateProfileInput } from "@shared/types";
 
+// Cache configuration for profile data
+const PROFILE_STALE_TIME = 1000 * 60 * 3; // 3 minutes
+const PROFILE_CACHE_TIME = 1000 * 60 * 10; // 10 minutes
+
 export function useMyProfile() {
   return useQuery({
     queryKey: ["myProfile"],
@@ -9,6 +13,8 @@ export function useMyProfile() {
       const response = await api.get("/me/profile");
       return response as { data: Profile | null; hasProfile: boolean };
     },
+    staleTime: PROFILE_STALE_TIME,
+    gcTime: PROFILE_CACHE_TIME,
   });
 }
 
@@ -16,11 +22,13 @@ export function useProfileByUsername(username: string) {
   return useQuery({
     queryKey: ["profile", username],
     queryFn: async () => {
-      const response = await api.get(`/profiles/${username}`);
-      // Based on our generic api.ts, it returns the body. We need to cast it.
-      return response as { data: any }; // Using any here because it's a nested structure
+      const response = await api.get(`/${username}`);
+      return response as { data: any };
     },
-    enabled: !!username, // Only run query if username is valid
+    staleTime: 1000 * 30, // 30 seconds - public profiles should update faster
+    gcTime: PROFILE_CACHE_TIME,
+    enabled: !!username,
+    refetchOnMount: true,
   });
 }
 

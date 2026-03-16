@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { Env } from "../middleware/auth";
 import { authMiddleware } from "../middleware/auth";
 import { profileService } from "../services/profileService";
+import { string } from "zod";
 
 const uploadRoutes = new Hono<Env>();
 
@@ -46,9 +47,17 @@ uploadRoutes.post("/me/avatar", authMiddleware, async (c) => {
   }
 
   const arrayBuffer = await file.arrayBuffer();
-  const uploadRes = await fetch(
-    `${supabaseUrl}/storage/v1/object/avatars/${path}`,
-    {
+  const bucketName = "avatar";
+  const objectPath = `${userId}/${Date.now()}.${ext}`;
+  
+  // Construct upload URL
+  const uploadUrl = `${supabaseUrl}/storage/v1/object/${encodeURIComponent(bucketName)}/${encodeURIComponent(objectPath)}`;
+  
+  console.log("Uploading to bucket:", bucketName);
+  console.log("Upload URL:", uploadUrl);
+  
+  try {
+    const uploadRes = await fetch(uploadUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${supabaseServiceKey}`,
@@ -56,22 +65,27 @@ uploadRoutes.post("/me/avatar", authMiddleware, async (c) => {
         "x-upsert": "true",
       },
       body: arrayBuffer,
+    });
+
+    if (!uploadRes.ok) {
+      const err = await uploadRes.text();
+      console.error("Storage upload failed:", err);
+      console.error("Status:", uploadRes.status);
+      console.error("Status text:", uploadRes.statusText);
+      return c.json({ error: `Upload failed: ${err}` }, 500);
     }
-  );
 
-  if (!uploadRes.ok) {
-    const err = await uploadRes.text();
-    console.error("Storage upload failed:", err);
-    return c.json({ error: "Upload failed" }, 500);
+    // Build public URL
+    const avatarUrl = `${supabaseUrl}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${encodeURIComponent(objectPath)}`;
+    
+    // Update profile with new avatar URL
+    await profileService.update(userId, { avatarUrl });
+
+    return c.json({ data: { avatarUrl } });
+  } catch (error:any) {
+    console.error("Error during upload:", error);
+    return c.json({ error: "Upload error: " + error.message}, 500);
   }
-
-  // Build public URL
-  const avatarUrl = `${supabaseUrl}/storage/v1/object/public/avatars/${path}`;
-
-  // Update profile with new avatar URL
-  await profileService.update(userId, { avatarUrl });
-
-  return c.json({ data: { avatarUrl } });
 });
 
 // ============================================
@@ -136,7 +150,7 @@ uploadRoutes.post("/me/projects/:id/image", authMiddleware, async (c) => {
 
   // Import projectService inline to update the project
   const { projectService } = await import("../services/projectService");
-  const updated = await projectService.update(id, profile.id, { imageUrl });
+  const updated = await projectService.update(id, profile.id , { imageUrl });
 
   if (!updated) {
     return c.json({ error: "Project not found" }, 404);
