@@ -19,19 +19,32 @@ export function useAuth() {
 
     const initAuth = async () => {
       try {
-        // Get initial session
-        const { data: { session } } = await supabase.auth.getSession();
-        if (isMounted) {
-          updateSession(session);
-          setInitialized(true);
+        // First, try to get session from storage immediately
+        // This helps with session restoration on page refresh
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        
+        if (existingSession) {
+          if (isMounted) {
+            updateSession(existingSession);
+            setInitialized(true);
+          }
+        } else {
+          // No session yet, set loading to false and initialized
+          // Wait for onAuthStateChange to potentially restore session
+          if (isMounted) {
+            setLoading(false);
+            setInitialized(true);
+          }
         }
 
-        // Listen for changes
+        // Listen for auth changes - this includes session restoration
         const {
           data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, newSession) => {
           if (isMounted) {
+            console.log("Auth state changed:", _event, !!newSession);
             updateSession(newSession);
+            setInitialized(true);
           }
         });
 

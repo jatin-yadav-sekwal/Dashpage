@@ -47,9 +47,11 @@ export default function Login() {
             toast.error(error.message);
         } else if (data.session) {
             toast.success("Welcome back!");
-            // Always redirect to the intended destination
-            // The ProtectedRoute will handle checking if profile exists
-            navigate(from);
+            // Small delay to ensure auth state is synced before navigation
+            // This prevents race condition where ProtectedRoute checks before session is ready
+            setTimeout(() => {
+                navigate(from, { replace: true });
+            }, 100);
         }
     };
 

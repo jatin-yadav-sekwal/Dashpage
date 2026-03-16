@@ -7,13 +7,13 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requireProfile: _requireProfile = true }: ProtectedRouteProps) {
-    const { user, loading: authLoading, session } = useAuth();
+    const { user, loading: authLoading, session, initialized } = useAuth();
     
-    // Debug logging
-    console.log("ProtectedRoute - authLoading:", authLoading, "user:", !!user, "session:", !!session);
+    console.log("ProtectedRoute - initialized:", initialized, "authLoading:", authLoading, "user:", !!user, "session:", !!session);
 
-    // Show loading while checking auth state
-    if (authLoading) {
+    // Show loading spinner while auth is initializing
+    // This prevents premature redirects when session is still being loaded from storage
+    if (!initialized || authLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -28,6 +28,5 @@ export function ProtectedRoute({ children, requireProfile: _requireProfile = tru
     }
 
     // User is authenticated, let the child component handle profile loading
-    // This allows Dashboard to show its own skeleton loaders
     return <>{children}</>;
 }

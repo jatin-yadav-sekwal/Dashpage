@@ -27,7 +27,9 @@ export default function Signup() {
             toast.error(error.message);
         } else {
             toast.success("Account created! Please complete your profile.");
-            navigate("/onboarding");
+            setTimeout(() => {
+                navigate("/onboarding", { replace: true });
+            }, 100);
         }
     };
 
