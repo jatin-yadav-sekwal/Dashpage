@@ -20,28 +20,8 @@ export default function Login() {
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (isMounted && session) {
-                // User is already logged in, check if they have a profile
-                try {
-                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/me/profile`, {
-                        headers: {
-                            'Authorization': `Bearer ${session.access_token}`
-                        }
-                    });
-                    
-                    if (isMounted && response.ok) {
-                        const profileData = await response.json();
-                        if (profileData?.hasProfile === false) {
-                            navigate("/onboarding");
-                        } else {
-                            navigate(from);
-                        }
-                    }
-                } catch (error) {
-                    // If profile check fails, just redirect to dashboard
-                    if (isMounted) {
-                        navigate(from);
-                    }
-                }
+                // User is already logged in, redirect to dashboard
+                navigate(from);
             }
         };
 
