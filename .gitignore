@@ -4,4 +4,3 @@ dist/
 apps/api/.env
 apps/web/.env
 *.lock
-wrangler.toml
