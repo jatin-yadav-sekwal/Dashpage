@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { DotDistortionShader } from "../ui/dot-distortion-shader";
 import { TypewriterEffect } from "../ui/typewriter-effect";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 
 export function HeroSection() {
     const { user, loading } = useAuth();

@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/landing/Navbar";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import {

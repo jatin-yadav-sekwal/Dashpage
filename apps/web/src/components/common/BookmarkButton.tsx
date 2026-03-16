@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Bookmark as BookmarkIcon, BookmarkCheck } from "lucide-react";
 import { useBookmark } from "@/features/bookmarks/hooks";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
 interface BookmarkButtonProps {

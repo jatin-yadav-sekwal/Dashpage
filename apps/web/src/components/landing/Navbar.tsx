@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, AnimatePresence } from "motion/react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 import { LogOut, Menu, X } from "lucide-react";
 
 export function Navbar() {

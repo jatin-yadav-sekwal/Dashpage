@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, AnimatePresence } from "motion/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bookmark as BookmarkIcon, Menu, X } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 import { useBookmark } from "@/features/bookmarks/hooks";
 import { toast } from "sonner";
 

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, Paintbrush } from "lucide-react";
 import { toast } from "sonner";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Themes() {
     const { user } = useAuth();

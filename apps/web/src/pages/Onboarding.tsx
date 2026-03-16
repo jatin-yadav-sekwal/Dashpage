@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 import { useCreateProfile } from "@/features/profile/hooks/useProfile";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

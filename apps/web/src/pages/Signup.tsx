@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -8,6 +9,13 @@ export default function Signup() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { user, initialized } = useAuth();
+
+    useEffect(() => {
+        if (initialized && user) {
+            navigate("/dashboard", { replace: true });
+        }
+    }, [initialized, user, navigate]);
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,10 +34,8 @@ export default function Signup() {
         if (error) {
             toast.error(error.message);
         } else {
-            toast.success("Account created! Please complete your profile.");
-            setTimeout(() => {
-                navigate("/onboarding", { replace: true });
-            }, 100);
+            toast.success("Account created! Please check your email to verify.");
+            navigate("/login");
         }
     };
 
@@ -37,7 +43,7 @@ export default function Signup() {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
-                redirectTo: `${window.location.origin}/onboarding`,
+                redirectTo: `${window.location.origin}/dashboard`,
             },
         });
 
@@ -45,6 +51,18 @@ export default function Signup() {
             toast.error(error.message);
         }
     };
+
+    if (!initialized) {
+        return (
+            <div className="min-h-[80vh] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+        );
+    }
+
+    if (user) {
+        return null;
+    }
 
     return (
         <div className="min-h-[80vh] flex items-center justify-center px-4">

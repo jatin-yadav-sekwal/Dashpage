@@ -1,19 +1,16 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
-    requireProfile?: boolean;
 }
 
-export function ProtectedRoute({ children, requireProfile: _requireProfile = true }: ProtectedRouteProps) {
-    const { user, loading: authLoading, session, initialized } = useAuth();
-    
-    console.log("ProtectedRoute - initialized:", initialized, "authLoading:", authLoading, "user:", !!user, "session:", !!session);
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
+    const { user, loading, initialized, session } = useAuth();
 
-    // Show loading spinner while auth is initializing
-    // This prevents premature redirects when session is still being loaded from storage
-    if (!initialized || authLoading) {
+    // Critical: Wait for auth to be fully initialized before making any decisions
+    // This prevents the race condition where we redirect before session is loaded
+    if (!initialized || loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -23,10 +20,9 @@ export function ProtectedRoute({ children, requireProfile: _requireProfile = tru
 
     // No session - redirect to login
     if (!user || !session) {
-        console.log("ProtectedRoute - No user/session, redirecting to login");
         return <Navigate to="/login" replace />;
     }
 
-    // User is authenticated, let the child component handle profile loading
+    // User is authenticated
     return <>{children}</>;
 }

@@ -13,7 +13,7 @@ import {
     ChevronRight,
     XCircle,
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/landing/Navbar";
 import { SiteFooter } from "@/components/landing/SiteFooter";
 import { toast } from "sonner";

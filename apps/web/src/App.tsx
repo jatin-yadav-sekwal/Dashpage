@@ -1,6 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-// import { Navbar } from "@/components/layout/Navbar";
-// import { Footer } from "@/components/layout/Footer";
+import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
@@ -14,61 +13,61 @@ import NotFound from "@/pages/NotFound";
 
 function App() {
     return (
-        <div className="min-h-screen flex flex-col">
-            {/* <Navbar /> */}
-            <main className="flex-1">
-                <Routes>
-                    {/* Public */}
-                    <Route path="/" element={<Landing />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
+        <AuthProvider>
+            <div className="min-h-screen flex flex-col">
+                <main className="flex-1">
+                    <Routes>
+                        {/* Public */}
+                        <Route path="/" element={<Landing />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/signup" element={<Signup />} />
 
-                    {/* Protected - requires auth, redirects to onboarding if no profile */}
-                    <Route
-                        path="/onboarding"
-                        element={
-                            <ProtectedRoute requireProfile={false}>
-                                <Onboarding />
-                            </ProtectedRoute>
-                        }
-                    />
+                        {/* Protected - requires auth */}
+                        <Route
+                            path="/onboarding"
+                            element={
+                                <ProtectedRoute>
+                                    <Onboarding />
+                                </ProtectedRoute>
+                            }
+                        />
 
-                    <Route
-                        path="/dashboard"
-                        element={
-                            <ProtectedRoute>
-                                <Dashboard />
-                            </ProtectedRoute>
-                        }
-                    />
-                    {/* Added Themes protected route */}
-                    <Route
-                        path="/themes"
-                        element={
-                            <ProtectedRoute>
-                                <Themes />
-                            </ProtectedRoute>
-                        }
-                    />
-                    {/* Bookmarks protected route */}
-                    <Route
-                        path="/bookmarks"
-                        element={
-                            <ProtectedRoute>
-                                <Bookmarks />
-                            </ProtectedRoute>
-                        }
-                    />
+                        <Route
+                            path="/dashboard"
+                            element={
+                                <ProtectedRoute>
+                                    <Dashboard />
+                                </ProtectedRoute>
+                            }
+                        />
 
-                    {/* Public Profile (username-based URL) */}
-                    <Route path="/:username" element={<ProfilePage />} />
-                    
-                    {/* 404 - Not Found */}
-                    <Route path="*" element={<NotFound />} />
-                </Routes>
-            </main>
-            {/* <Footer /> */}
-        </div>
+                        <Route
+                            path="/themes"
+                            element={
+                                <ProtectedRoute>
+                                    <Themes />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        <Route
+                            path="/bookmarks"
+                            element={
+                                <ProtectedRoute>
+                                    <Bookmarks />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Public Profile (username-based URL) */}
+                        <Route path="/:username" element={<ProfilePage />} />
+                        
+                        {/* 404 - Not Found */}
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </main>
+            </div>
+        </AuthProvider>
     );
 }
 

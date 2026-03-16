@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -9,28 +10,16 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const { user, initialized } = useAuth();
 
-    // Get the redirect location from state or default to dashboard
     const from = location.state?.from || "/dashboard";
 
-    // Check if user is already logged in and redirect accordingly
+    // Only redirect if auth is initialized and user is already logged in
     useEffect(() => {
-        let isMounted = true;
-        
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (isMounted && session) {
-                // User is already logged in, redirect to dashboard
-                navigate(from);
-            }
-        };
-
-        checkSession();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [navigate, from]);
+        if (initialized && user) {
+            navigate(from, { replace: true });
+        }
+    }, [initialized, user, navigate, from]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -47,11 +36,9 @@ export default function Login() {
             toast.error(error.message);
         } else if (data.session) {
             toast.success("Welcome back!");
-            // Small delay to ensure auth state is synced before navigation
-            // This prevents race condition where ProtectedRoute checks before session is ready
-            setTimeout(() => {
-                navigate(from, { replace: true });
-            }, 100);
+            // Navigate immediately - the AuthContext will handle the state update
+            // and ProtectedRoute will now see the correct state
+            navigate(from, { replace: true });
         }
     };
 
@@ -67,6 +54,20 @@ export default function Login() {
             toast.error(error.message);
         }
     };
+
+    // Show loading while checking auth
+    if (!initialized) {
+        return (
+            <div className="min-h-[80vh] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+        );
+    }
+
+    // If already logged in, show nothing while redirecting
+    if (user) {
+        return null;
+    }
 
     return (
         <div className="min-h-[80vh] flex items-center justify-center px-4">

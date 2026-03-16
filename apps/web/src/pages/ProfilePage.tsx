@@ -4,7 +4,7 @@ import { useProfileByUsername } from "@/features/profile/hooks/useProfile";
 import { motion, Variants } from "framer-motion";
 import { PublicProfile } from "@shared/types";
 import { useBookmark } from "@/features/bookmarks/hooks";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 import { ProfileNavbar } from "@/components/profile/ProfileNavbar";
 import { ProfileFooter } from "@/components/profile/ProfileFooter";
 import { heroComponents, experienceSections, educationSections, projectSections, ContactSection } from "@/components/profile/sections";
