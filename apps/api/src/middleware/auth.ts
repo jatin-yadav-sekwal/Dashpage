@@ -19,6 +19,9 @@ export type Env = {
     RAZORPAY_KEY_ID: string;
     RAZORPAY_KEY_SECRET: string;
     RAZORPAY_WEBHOOK_SECRET: string;
+    SUPABASE_URL: string;
+    SUPABASE_JWKS_URL?: string;
+    SUPABASE_SERVICE_ROLE_KEY: string;
   };
 };
 
@@ -29,6 +32,7 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
   const authHeader = c.req.header("Authorization");
 
   if (!authHeader) {
+    console.log("[Auth] No Authorization header");
     return c.json({ error: "Unauthorized" }, 401);
   }
 
@@ -36,7 +40,8 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
 
   try {
     // Fetch the correct public key from Supabase JWKS (cached)
-    const publicKey = await getSupabasePublicKey(token);
+    // Pass c.env so it can find the URL in Workers
+    const publicKey = await getSupabasePublicKey(token, c.env);
 
     // Verify Token using fetched Public Key (ES256)
     const payload = await verify(token, publicKey, "ES256");
@@ -45,6 +50,7 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
     const userId = payload.sub as string;
 
     if (!userId) {
+      console.error("[Auth] No sub claim found in payload:", payload);
       throw new Error("Invalid Token");
     }
 

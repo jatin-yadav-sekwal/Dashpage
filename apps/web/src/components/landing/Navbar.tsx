@@ -9,7 +9,7 @@ export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const { user, signOut } = useAuth();
+    const { user, initialized, loading, signOut } = useAuth();
 
     useEffect(() => {
         return scrollY.on("change", (latest) => {
@@ -21,7 +21,10 @@ export function Navbar() {
     let navItems;
     let ctaButton;
 
-    if (user) {
+    // While auth is initializing, show "Get Started" (default) to avoid layout shift
+    const isAuthReady = initialized && !loading;
+
+    if (isAuthReady && user) {
         navItems = [
             { name: "Dashboard", link: "/dashboard" },
             { name: "Bookmarks", link: "/bookmarks" },
@@ -37,7 +40,7 @@ export function Navbar() {
                 Log Out <LogOut className="w-4 h-4 ml-2" />
             </button>
         );
-    } else {
+    } else if (isAuthReady && !user) {
         navItems = [
             { name: "Features", link: "/#features" },
             { name: "Themes", link: "/themes" },
@@ -50,6 +53,17 @@ export function Navbar() {
             >
                 Get Started
             </Link>
+        );
+    } else {
+        // Auth not ready yet — show minimal nav to prevent flashing
+        navItems = [
+            { name: "Features", link: "/#features" },
+            { name: "Themes", link: "/themes" },
+        ];
+        ctaButton = (
+            <div className="inline-flex items-center justify-center rounded-full px-6 py-2.5 text-sm font-bold text-transparent bg-slate-200 animate-pulse">
+                Loading...
+            </div>
         );
     }
 

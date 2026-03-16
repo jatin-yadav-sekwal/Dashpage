@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { api } from "@/lib/api";
 
 const STALE_TIME = 1000 * 60 * 3;
@@ -7,7 +8,7 @@ const THEME_STALE_TIME = 1000 * 60 * 10;
 export function usePrefetchDashboardData() {
   const queryClient = useQueryClient();
 
-  const prefetchAll = async () => {
+  const prefetchAll = useCallback(async () => {
     await Promise.all([
       queryClient.prefetchQuery({
         queryKey: ["myExperiences"],
@@ -50,7 +51,7 @@ export function usePrefetchDashboardData() {
         staleTime: THEME_STALE_TIME,
       }),
     ]);
-  };
+  }, [queryClient]);
 
   return { prefetchAll };
 }

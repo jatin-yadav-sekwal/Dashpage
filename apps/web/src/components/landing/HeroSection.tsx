@@ -5,7 +5,7 @@ import { TypewriterEffect } from "../ui/typewriter-effect";
 import { useAuth } from "@/context/AuthContext";
 
 export function HeroSection() {
-    const { user, loading } = useAuth();
+    const { user, initialized } = useAuth();
     
     const words = [
         { text: "Experience" },
@@ -51,7 +51,7 @@ export function HeroSection() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center sm:items-start justify-start gap-3 sm:gap-4 w-full sm:w-auto">
-                        {loading ? (
+                        {!initialized ? (
                             <div className="inline-flex items-center justify-center w-full sm:w-auto rounded-full px-6 sm:px-8 py-3 sm:py-3.5 text-sm sm:text-base font-bold text-white bg-slate-800 animate-pulse">
                                 Loading...
                             </div>

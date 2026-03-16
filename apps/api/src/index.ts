@@ -27,15 +27,26 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
+// Database Initialization Middleware
+app.use("*", async (c, next) => {
+  try {
+    const { getDb } = await import("./db");
+    getDb(c.env);
+  } catch (error) {
+    console.error("[DB] Failed to initialize database:", error);
+  }
+  await next();
+});
+
 // Global Middleware
 app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: (origin) => {
+    origin: (origin, c) => {
       const allowedOrigins = [
-        process.env.WEB_URL,
-        process.env.CORS_ORIGIN,
+        c.env.FRONTEND_URL,
+        c.env.CORS_ORIGIN,
         "http://localhost:5173",
         "https://dashpage-web.vercel.app",
       ].filter((url): url is string => !!url);
@@ -65,8 +76,8 @@ app.get("/debug", async (c) => {
     message: "API is working",
     timestamp: new Date().toISOString(),
     env: {
-      DATABASE_URL: process.env.DATABASE_URL ? "configured" : "missing",
-      SUPABASE_URL: process.env.SUPABASE_URL ? "configured" : "missing",
+      DATABASE_URL: c.env.DATABASE_URL ? "configured" : "missing",
+      SUPABASE_URL: c.env.SUPABASE_URL ? "configured" : "missing",
     }
   });
 });

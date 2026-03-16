@@ -39,8 +39,8 @@ uploadRoutes.post("/me/avatar", authMiddleware, async (c) => {
   const path = `${userId}/${Date.now()}.${ext}`;
 
   // Upload to Supabase Storage
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = c.env.SUPABASE_URL;
+  const supabaseServiceKey = c.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
     return c.json({ error: "Storage not configured" }, 500);
@@ -119,8 +119,8 @@ uploadRoutes.post("/me/projects/:id/image", authMiddleware, async (c) => {
   const ext = file.name.split(".").pop() || "jpg";
   const path = `${userId}/${id}/${Date.now()}.${ext}`;
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = c.env.SUPABASE_URL;
+  const supabaseServiceKey = c.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
     return c.json({ error: "Storage not configured" }, 500);

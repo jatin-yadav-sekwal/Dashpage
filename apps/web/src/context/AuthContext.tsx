@@ -27,42 +27,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
+    // Track whether onAuthStateChange has already given us the initial session.
+    // If it fires first, we skip the getSession() update to avoid overwriting.
+    let authEventFired = false;
 
+    // IMPORTANT: Set up the auth state listener FIRST, before getSession().
+    // This ensures we don't miss the SIGNED_IN event from OAuth redirects
+    // (which fires when Supabase processes the hash fragment in the URL).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, newSession) => {
+        console.log("Auth state changed:", _event, newSession ? "session exists" : "no session");
+        authEventFired = true;
+
+        if (isMounted) {
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+          setLoading(false);
+          setInitialized(true);
+        }
+      }
+    );
+
+    // Fallback: get the existing session from storage.
+    // Only applies if onAuthStateChange hasn't fired yet (e.g., no OAuth redirect).
     const initAuth = async () => {
       try {
-        // Get initial session from storage
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           console.error("Error getting session:", error);
         }
 
-        if (isMounted) {
-          if (currentSession) {
-            setSession(currentSession);
-            setUser(currentSession.user);
-          }
+        if (isMounted && !authEventFired) {
+          // onAuthStateChange hasn't fired yet, so we set state from getSession()
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          setLoading(false);
+          setInitialized(true);
+        } else if (isMounted) {
+          // onAuthStateChange already ran — just ensure loading flags are cleared
           setLoading(false);
           setInitialized(true);
         }
-
-        // Listen for auth changes - this is critical for maintaining sync
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-          async (_event, newSession) => {
-            console.log("Auth state changed:", _event, newSession ? "session exists" : "no session");
-            
-            if (isMounted) {
-              setSession(newSession);
-              setUser(newSession?.user ?? null);
-              setLoading(false);
-              setInitialized(true);
-            }
-          }
-        );
-
-        return () => {
-          subscription.unsubscribe();
-        };
       } catch (error) {
         console.error("Auth initialization error:", error);
         if (isMounted) {
@@ -76,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       isMounted = false;
+      subscription.unsubscribe();
     };
   }, []);
 
