@@ -4,10 +4,10 @@ import * as schema from "./schema";
 
 let dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
-function getDb() {
+function getDb(env?: { DATABASE_URL?: string }) {
   if (dbInstance) return dbInstance;
   
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = env?.DATABASE_URL || process.env.DATABASE_URL;
   
   if (!connectionString) {
     throw new Error("DATABASE_URL environment variable is not set");

@@ -39,6 +39,7 @@ app.use(
         "http://localhost:5173",
         "https://dashpage-an6.pages.dev",
         "https://43b7aa58.dashpage-an6.pages.dev",
+        "https://ebc45530.dashpage-an6.pages.dev",
       ].filter((url): url is string => !!url);
 
       if (!origin) return allowedOrigins[0] || "*";

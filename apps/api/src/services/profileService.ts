@@ -1,9 +1,7 @@
-import { getDb } from "../db";
+import { db } from "../db";
 import { eq, desc, and } from "drizzle-orm";
 import { profiles, profileTags, experiences, educations, projects, themes } from "../db/schema";
 import type { CreateProfileInput, UpdateProfileInput } from "../validators/profileValidator";
-
-const db = getDb();
 
 export const profileService = {
   /** Get a public profile by username with all related data */
