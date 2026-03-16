@@ -2,26 +2,47 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { useMyProfile } from "@/features/profile/hooks/useProfile";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const { data: profileData } = useMyProfile();
     const location = useLocation();
 
     // Get the redirect location from state or default to dashboard
     const from = location.state?.from || "/dashboard";
 
+    // Check if user is already logged in and redirect accordingly
     useEffect(() => {
-        if (profileData?.hasProfile === false) {
-            navigate("/onboarding");
-        } else if (profileData?.hasProfile === true) {
-            navigate(from);
-        }
-    }, [profileData, navigate, from]);
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                // User is already logged in, check if they have a profile
+                try {
+                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/me/profile`, {
+                        headers: {
+                            'Authorization': `Bearer ${session.access_token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const profileData = await response.json();
+                        if (profileData?.hasProfile === false) {
+                            navigate("/onboarding");
+                        } else {
+                            navigate(from);
+                        }
+                    }
+                } catch (error) {
+                    // If profile check fails, just redirect to dashboard
+                    navigate(from);
+                }
+            }
+        };
+
+        checkSession();
+    }, [navigate, from]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
