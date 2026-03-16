@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 export function Navbar() {
-    const { user, signOut } = useAuth();
+    const { user, loading, signOut } = useAuth();
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -30,7 +30,9 @@ export function Navbar() {
                         Themes
                     </Link>
 
-                    {user ? (
+                    {loading ? (
+                        <div className="h-8 w-20 bg-muted rounded animate-pulse" />
+                    ) : user ? (
                         <>
                             <Link
                                 to="/dashboard"
