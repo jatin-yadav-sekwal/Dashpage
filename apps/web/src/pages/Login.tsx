@@ -15,9 +15,11 @@ export default function Login() {
 
     // Check if user is already logged in and redirect accordingly
     useEffect(() => {
+        let isMounted = true;
+        
         const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
+            if (isMounted && session) {
                 // User is already logged in, check if they have a profile
                 try {
                     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/me/profile`, {
@@ -26,7 +28,7 @@ export default function Login() {
                         }
                     });
                     
-                    if (response.ok) {
+                    if (isMounted && response.ok) {
                         const profileData = await response.json();
                         if (profileData?.hasProfile === false) {
                             navigate("/onboarding");
@@ -36,12 +38,18 @@ export default function Login() {
                     }
                 } catch (error) {
                     // If profile check fails, just redirect to dashboard
-                    navigate(from);
+                    if (isMounted) {
+                        navigate(from);
+                    }
                 }
             }
         };
 
         checkSession();
+
+        return () => {
+            isMounted = false;
+        };
     }, [navigate, from]);
 
     const handleLogin = async (e: React.FormEvent) => {
