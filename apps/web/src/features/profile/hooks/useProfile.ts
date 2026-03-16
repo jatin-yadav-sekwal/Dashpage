@@ -6,7 +6,7 @@ import type { Profile, CreateProfileInput, UpdateProfileInput } from "@shared/ty
 const PROFILE_STALE_TIME = 1000 * 60 * 3; // 3 minutes
 const PROFILE_CACHE_TIME = 1000 * 60 * 10; // 10 minutes
 
-export function useMyProfile() {
+export function useMyProfile(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["myProfile"],
     queryFn: async () => {
@@ -15,6 +15,8 @@ export function useMyProfile() {
     },
     staleTime: PROFILE_STALE_TIME,
     gcTime: PROFILE_CACHE_TIME,
+    enabled: options?.enabled ?? true,
+    retry: false, // Don't retry failed requests (e.g., 401 errors)
   });
 }
 

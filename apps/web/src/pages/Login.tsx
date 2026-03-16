@@ -47,27 +47,9 @@ export default function Login() {
             toast.error(error.message);
         } else if (data.session) {
             toast.success("Welcome back!");
-            // Check if user has a profile by making a quick API call
-            try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/me/profile`, {
-                    headers: {
-                        'Authorization': `Bearer ${data.session.access_token}`
-                    }
-                });
-                
-                if (response.ok) {
-                    const profileData = await response.json();
-                    if (profileData?.hasProfile === false) {
-                        navigate("/onboarding");
-                    } else {
-                        navigate(from);
-                    }
-                } else {
-                    navigate(from);
-                }
-            } catch (error) {
-                navigate(from);
-            }
+            // Always redirect to the intended destination
+            // The ProtectedRoute will handle checking if profile exists
+            navigate(from);
         }
     };
 
