@@ -6,7 +6,6 @@ import { z } from "zod";
 
 const router = new Hono<{ Bindings: Env["Bindings"]; Variables: Variables }>();
 
-// POST /api/me/payments/create-order
 const createOrderSchema = z.object({
   themeId: z.string().uuid()
 });
@@ -21,7 +20,11 @@ router.post(
     const { themeId } = c.req.valid("json");
 
     try {
-      const orderDetails = await paymentService.createOrder(userId, themeId, c.env);
+      const env = {
+        RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || "",
+        RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || "",
+      };
+      const orderDetails = await paymentService.createOrder(userId, themeId, env);
       return c.json({ data: orderDetails });
     } catch (e: any) {
       return c.json({ error: e.message }, 400);
@@ -29,8 +32,6 @@ router.post(
   }
 );
 
-
-// POST /api/me/payments/verify
 const verifySchema = z.object({
   themeId: z.string().uuid(),
   razorpay_order_id: z.string(),
@@ -48,13 +49,17 @@ router.post(
     const data = c.req.valid("json");
 
     try {
+      const env = {
+        RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || "",
+        RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || "",
+      };
       const result = await paymentService.verifyPayment(
         userId, 
         data.themeId, 
         data.razorpay_order_id, 
         data.razorpay_payment_id, 
         data.razorpay_signature, 
-        c.env
+        env
       );
       return c.json({ data: result });
     } catch (e: any) {

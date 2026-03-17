@@ -1,11 +1,9 @@
 import { createMiddleware } from "hono/factory";
-
 import { profiles } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { verify } from "hono/jwt";
 import { getSupabasePublicKey } from "../utils/jwks";
 
-// Dashpage auth context — simplified from unmarky
 export type Env = {
   Variables: {
     userId: string;
@@ -39,13 +37,9 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
   const token = authHeader.replace("Bearer ", "").trim();
 
   try {
-    // Fetch the correct public key from Supabase JWKS (cached)
     const publicKey = await getSupabasePublicKey(token);
-
-    // Verify Token using fetched Public Key (ES256)
     const payload = await verify(token, publicKey, "ES256");
 
-    // Supabase JWT 'sub' claim is the user ID
     const userId = payload.sub as string;
 
     if (!userId) {
@@ -66,7 +60,6 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
       c.set("username", profile.username);
       c.set("hasProfile", true);
     } else {
-      // User exists in Auth but hasn't created a profile yet
       c.set("userId", userId);
       c.set("username", null);
       c.set("hasProfile", false);
