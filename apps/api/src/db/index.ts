@@ -4,6 +4,8 @@ import * as schema from "./schema";
 
 let dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
+const isServerless = process.env.VERCEL === "1" || process.env.AWS_LAMBDA_FUNCTION_NAME !== undefined;
+
 export function createDbConnection() {
   const connectionString = process.env.DATABASE_URL;
   
@@ -12,7 +14,7 @@ export function createDbConnection() {
     throw new Error("DATABASE_URL is not set");
   }
 
-  console.log("[DB] Creating database connection...");
+  console.log("[DB] Creating database connection...", { isServerless });
 
   let finalConnectionString = connectionString;
   if (connectionString.includes("supabase") && connectionString.includes(":5432/")) {
@@ -20,15 +22,16 @@ export function createDbConnection() {
     console.log("[DB] Using Supabase pooler port 6543");
   }
 
-  const client = postgres(finalConnectionString, { 
+  const options = {
     prepare: false,
-    max: 1,
-    idle_timeout: 20,
-    connect_timeout: 10,
-    max_lifetime: 60,
-    keep_alive: 1,
-  });
+    max: isServerless ? 1 : 10,
+    idle_timeout: isServerless ? 20 : 20,
+    connect_timeout: isServerless ? 10 : 10,
+    max_lifetime: isServerless ? 60 : 300,
+    keep_alive: isServerless ? 1 : 0,
+  };
 
+  const client = postgres(finalConnectionString, options);
   return drizzle(client, { schema });
 }
 

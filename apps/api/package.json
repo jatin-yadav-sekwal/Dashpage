@@ -4,6 +4,9 @@
     "main": "dist/index.js",
     "type": "module",
     "private": true,
+    "engines": {
+        "node": ">=20.0.0"
+    },
     "scripts": {
         "dev": "bun run --watch index.ts",
         "build": "tsc",

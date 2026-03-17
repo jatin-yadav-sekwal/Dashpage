@@ -52,7 +52,7 @@ export async function getSupabasePublicKey(
     throw new Error(`[JWKS] Failed to fetch: ${response.status} ${response.statusText}`);
   }
 
-  const jwks: JWKS = await response.json();
+  const jwks = await response.json() as JWKS;
   const jwk = jwks.keys.find((k) => k.kid === kid);
 
   if (!jwk) {

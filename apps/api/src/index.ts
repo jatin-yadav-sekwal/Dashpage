@@ -33,19 +33,22 @@ const app = new Hono<{ Variables: Variables; Bindings: Bindings }>();
 app.use("*", timing());
 app.use("*", logger());
 
+const ALLOWED_ORIGINS = [
+  "https://dashpage-web.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
 app.use(
   "*",
   cors({
     origin: (origin) => {
-      const frontendUrl = process.env.FRONTEND_URL || "https://dashpage-web.vercel.app";
+      const frontendUrl = process.env.FRONTEND_URL;
       const corsOrigin = process.env.CORS_ORIGIN;
-      const allowedOrigins = [
-        frontendUrl,
-        corsOrigin,
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://dashpage-web.vercel.app",
-      ].filter((url): url is string => !!url);
+      
+      const allowedOrigins = ALLOWED_ORIGINS.filter(Boolean);
+      if (corsOrigin) allowedOrigins.push(corsOrigin);
+      if (frontendUrl) allowedOrigins.push(frontendUrl);
 
       if (!origin) return allowedOrigins[0] || "*";
       if (allowedOrigins.includes(origin)) return origin;
@@ -55,18 +58,30 @@ app.use(
     },
     allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
-    exposeHeaders: ["Content-Length"],
+    exposeHeaders: ["Content-Length", "X-Request-Id"],
     maxAge: 600,
     credentials: true,
   })
 );
 
 app.onError((err, c) => {
-  console.error("[API Error]", err);
-  return c.json({ error: err.message || "Internal Server Error" }, 500);
+  console.error("[API Error]", err.message);
+  return c.json({ 
+    error: err.message || "Internal Server Error",
+    requestId: c.req.header("X-Request-Id")
+  }, 500);
 });
 
-app.get("/", (c) => c.json({ status: "ok", name: "Dashpage API", version: "2.0" }));
+app.notFound((c) => {
+  return c.json({ error: "Not Found" }, 404);
+});
+
+app.get("/", (c) => c.json({ 
+  status: "ok", 
+  name: "Dashpage API", 
+  version: "2.0",
+  nodeVersion: process.version
+}));
 
 app.get("/debug", async (c) => {
   const dbUrl = process.env.DATABASE_URL ? "configured" : "missing";
@@ -76,6 +91,7 @@ app.get("/debug", async (c) => {
     status: "ok",
     message: "API is working",
     timestamp: new Date().toISOString(),
+    nodeVersion: process.version,
     env: {
       DATABASE_URL: dbUrl,
       SUPABASE_URL: supabaseUrl,
