@@ -15,6 +15,7 @@
     "dependencies": {
         "@hono/zod-validator": "^0.7.6",
         "@supabase/supabase-js": "^2.95.3",
+        "@vercel/hono": "^0.2.51",
         "drizzle-orm": "^0.45.1",
         "hono": "^4.11.7",
         "postgres": "^3.4.8",
