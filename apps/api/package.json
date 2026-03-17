@@ -6,14 +6,10 @@
     "scripts": {
         "dev": "bun run --watch src/index.ts",
         "build": "bun build src/index.ts --outdir ./dist --target bun",
-        "build:cf": "bun build src/index.ts --outdir ./dist --target bun",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
         "db:seed": "bun run src/db/seed-themes.ts",
-        "storage:setup": "bun run scripts/setup-avatar-bucket.ts",
-        "deploy": "wrangler deploy",
-        "deploy:prod": "wrangler deploy --env production",
-        "dev:cf": "wrangler dev --local"
+        "storage:setup": "bun run scripts/setup-avatar-bucket.ts"
     },
     "dependencies": {
         "@hono/zod-validator": "^0.7.6",
@@ -25,11 +21,9 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
-        "@cloudflare/workers-types": "^4.20260313.1",
         "@types/bun": "latest",
         "dotenv": "^17.2.3",
-        "drizzle-kit": "^0.31.8",
-        "wrangler": "^3.97.0"
+        "drizzle-kit": "^0.31.8"
     },
     "peerDependencies": {
         "typescript": "^5"

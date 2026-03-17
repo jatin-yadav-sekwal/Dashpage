@@ -25,28 +25,17 @@ type Bindings = {
   RAZORPAY_WEBHOOK_SECRET: string;
 };
 
-const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
-
-// Database Initialization Middleware
-app.use("*", async (c, next) => {
-  try {
-    const { getDb } = await import("./db");
-    getDb(c.env);
-  } catch (error) {
-    console.error("[DB] Failed to initialize database:", error);
-  }
-  await next();
-});
+const app = new Hono<{ Variables: Variables }>();
 
 // Global Middleware
 app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: (origin, c) => {
+    origin: (origin) => {
       const allowedOrigins = [
-        c.env.FRONTEND_URL,
-        c.env.CORS_ORIGIN,
+        process.env.FRONTEND_URL,
+        process.env.CORS_ORIGIN,
         "http://localhost:5173",
         "https://dashpage-web.vercel.app",
       ].filter((url): url is string => !!url);
@@ -76,8 +65,8 @@ app.get("/debug", async (c) => {
     message: "API is working",
     timestamp: new Date().toISOString(),
     env: {
-      DATABASE_URL: c.env.DATABASE_URL ? "configured" : "missing",
-      SUPABASE_URL: c.env.SUPABASE_URL ? "configured" : "missing",
+      DATABASE_URL: process.env.DATABASE_URL ? "configured" : "missing",
+      SUPABASE_URL: process.env.SUPABASE_URL ? "configured" : "missing",
     }
   });
 });
@@ -99,9 +88,5 @@ app.route("/api/upload", uploadRoutes);     // /api/upload/me/avatar, /api/uploa
 // Public username route (catch-all - must be last)
 app.route("/api", publicRoutes);            // /api/:username (all data in one call)
 
-// Export for Cloudflare Workers
-export default {
-  async fetch(request: Request, env: Bindings, ctx: any) {
-    return app.fetch(request, env, ctx);
-  },
-};
+// Export standard Hono app for Vercel/Node deployments
+export default app;

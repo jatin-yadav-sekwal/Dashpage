@@ -1,5 +1,5 @@
 import { createMiddleware } from "hono/factory";
-import { db } from "../db";
+
 import { profiles } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { verify } from "hono/jwt";
@@ -40,8 +40,7 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
 
   try {
     // Fetch the correct public key from Supabase JWKS (cached)
-    // Pass c.env so it can find the URL in Workers
-    const publicKey = await getSupabasePublicKey(token, c.env);
+    const publicKey = await getSupabasePublicKey(token);
 
     // Verify Token using fetched Public Key (ES256)
     const payload = await verify(token, publicKey, "ES256");
@@ -54,7 +53,8 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
       throw new Error("Invalid Token");
     }
 
-    // Check against our profiles table to get context
+    const { db } = await import("../db");
+    
     const profile = await db.query.profiles
       .findFirst({
         where: eq(profiles.userId, userId),
