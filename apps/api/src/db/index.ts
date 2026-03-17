@@ -4,10 +4,10 @@ import * as schema from "./schema";
 
 
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL || "postgres://dummy:dummy@localhost:5432/dummy";
 
-if (!connectionString) {
-  throw new Error("[DB] DATABASE_URL is not set.");
+if (!process.env.DATABASE_URL) {
+  console.warn("[DB] WARNING: DATABASE_URL is not set. Database queries will fail.");
 }
 
 console.log("[DB] Initializing database connection...");

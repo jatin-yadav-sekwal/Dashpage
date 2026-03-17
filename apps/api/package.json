@@ -5,6 +5,7 @@
     "private": true,
     "scripts": {
         "dev": "bun run --watch src/index.ts",
+        "build": "echo 'No build step for Vercel'",
         "build:bun": "bun build src/index.ts --outdir ./dist --target bun",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
