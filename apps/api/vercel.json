@@ -1,5 +1,5 @@
 {
   "framework": "hono",
-  "buildCommand": "bun install && bun run build",
+  "buildCommand": "bun install",
   "installCommand": "bun install"
 }
