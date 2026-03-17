@@ -4,6 +4,5 @@
       "src": "api/index.ts",
       "use": "@vercel/node@2.15.4"
     }
-  ],
-  "nodeVersion": "18.x"
+  ]
 }
