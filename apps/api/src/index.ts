@@ -1,4 +1,3 @@
-import { vercel } from "@vercel/hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -89,5 +88,4 @@ app.route("/api/upload", uploadRoutes);     // /api/upload/me/avatar, /api/uploa
 // Public username route (catch-all - must be last)
 app.route("/api", publicRoutes);            // /api/:username (all data in one call)
 
-// Export for Vercel
-export default vercel(app);
+export default app;
