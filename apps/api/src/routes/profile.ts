@@ -17,18 +17,18 @@ profileRoutes.get("/profiles/:username", async (c) => {
   const { username } = c.req.param();
   console.log(`[Profile Route] Requesting profile: ${username}`);
   
-  const profile = await profileService.getByUsername(username);
-  console.log(`[Profile Route] Profile result for ${username}:`, profile ? "found" : "not found");
+  const result = await profileService.getByUsername(username);
+  console.log(`[Profile Route] Profile result for ${username}:`, result.profile ? "found" : "not found");
 
-  if (!profile) {
+  if (result.notFound || !result.isPublished || !result.profile) {
     return c.json({ error: "Profile not found" }, 404);
   }
 
   c.header("Cache-Control", "public, max-age=60, s-maxage=180, stale-while-revalidate=300");
   c.header("X-Content-Type-Options", "nosniff");
-  c.header("ETag", `"${profile.id}-${profile.updatedAt}"`);
+  c.header("ETag", `"${result.profile.id}-${result.profile.updatedAt}"`);
   
-  return c.json({ data: profile });
+  return c.json({ data: result.profile });
 });
 
 // ============================================

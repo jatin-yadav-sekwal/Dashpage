@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { themes } from "./schema";
-import { sql } from "drizzle-orm";
+import { sql, type InferInsertModel } from "drizzle-orm";
 import * as dotenv from "dotenv";
 
 // Load environment variables
@@ -16,8 +16,10 @@ if (!connectionString) {
 const client = postgres(connectionString);
 const db = drizzle(client);
 
+type NewTheme = InferInsertModel<typeof themes>;
+
 // Define themes (2 Free, 3 Premium)
-const predefinedThemes = [
+const predefinedThemes: NewTheme[] = [
   {
     name: "Minimal Light",
     slug: "minimal-light",
@@ -37,9 +39,11 @@ const predefinedThemes = [
         heading: "Inter",
         body: "Inter",
       },
-      layout: "modern",
       borderRadius: "md",
       heroStyle: "centered",
+      experienceStyle: "timeline",
+      educationStyle: "timeline",
+      projectsStyle: "grid",
     },
   },
   {
@@ -61,9 +65,11 @@ const predefinedThemes = [
         heading: "Inter",
         body: "Inter",
       },
-      layout: "modern",
       borderRadius: "md",
-      heroStyle: "left-aligned",
+      heroStyle: "minimal",
+      experienceStyle: "minimal",
+      educationStyle: "minimal",
+      projectsStyle: "list",
     },
   },
   {
@@ -85,9 +91,11 @@ const predefinedThemes = [
         heading: "Space Grotesk",
         body: "Inter",
       },
-      layout: "bold",
       borderRadius: "none",
-      heroStyle: "centered",
+      heroStyle: "creative",
+      experienceStyle: "cards",
+      educationStyle: "cards",
+      projectsStyle: "masonry",
     },
   },
   {
@@ -109,9 +117,11 @@ const predefinedThemes = [
         heading: "Playfair Display",
         body: "Lora",
       },
-      layout: "classic",
       borderRadius: "full",
       heroStyle: "split",
+      experienceStyle: "timeline",
+      educationStyle: "timeline",
+      projectsStyle: "grid",
     },
   },
   {
@@ -133,9 +143,11 @@ const predefinedThemes = [
         heading: "Syncopate", // or another premium font
         body: "Outfit",
       },
-      layout: "minimal",
       borderRadius: "none",
-      heroStyle: "left-aligned",
+      heroStyle: "minimal",
+      experienceStyle: "minimal",
+      educationStyle: "minimal",
+      projectsStyle: "list",
     },
   },
 ];
