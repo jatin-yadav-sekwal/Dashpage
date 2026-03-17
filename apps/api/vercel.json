@@ -1,5 +1,11 @@
 {
   "framework": "hono",
   "buildCommand": "bun install",
-  "installCommand": "bun install"
+  "installCommand": "bun install",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/src/index.ts"
+    }
+  ]
 }
