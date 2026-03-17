@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { timing } from "hono/timing";
 import profileRoutes from "./routes/profile";
 import experienceRoutes from "./routes/experiences";
 import educationRoutes from "./routes/educations";
@@ -29,6 +30,7 @@ type Bindings = {
 
 const app = new Hono<{ Variables: Variables; Bindings: Bindings }>();
 
+app.use("*", timing());
 app.use("*", logger());
 
 app.use(
@@ -58,6 +60,11 @@ app.use(
     credentials: true,
   })
 );
+
+app.onError((err, c) => {
+  console.error("[API Error]", err);
+  return c.json({ error: err.message || "Internal Server Error" }, 500);
+});
 
 app.get("/", (c) => c.json({ status: "ok", name: "Dashpage API", version: "2.0" }));
 

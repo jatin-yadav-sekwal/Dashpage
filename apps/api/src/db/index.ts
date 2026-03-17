@@ -14,7 +14,6 @@ export function createDbConnection() {
 
   console.log("[DB] Creating database connection...");
 
-  // For Supabase: use port 6543 for connection pooling (transaction mode)
   let finalConnectionString = connectionString;
   if (connectionString.includes("supabase") && connectionString.includes(":5432/")) {
     finalConnectionString = connectionString.replace(/:5432\//, ":6543/");
@@ -26,6 +25,8 @@ export function createDbConnection() {
     max: 1,
     idle_timeout: 20,
     connect_timeout: 10,
+    max_lifetime: 60,
+    keep_alive: 1,
   });
 
   return drizzle(client, { schema });
@@ -38,7 +39,6 @@ export function getDb() {
   return dbInstance;
 }
 
-// Proxy-based lazy db export - forwards all property access to getDb()
 export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
   get(_target, prop) {
     const database = getDb();
@@ -49,3 +49,11 @@ export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
     return (database as any)(...args);
   }
 });
+
+export async function closeDbConnection() {
+  if (dbInstance) {
+    await dbInstance.$client.end();
+    dbInstance = null;
+    console.log("[DB] Connection closed");
+  }
+}

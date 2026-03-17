@@ -8,8 +8,9 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "outDir": "./dist",
-        "rootDir": "./src",
-        "declaration": true,
+        "rootDir": ".",
+        "declaration": false,
+        "noEmit": false,
         "types": ["node"],
         "paths": {
             "@shared/*": [
@@ -18,7 +19,9 @@
         }
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "api/**/*",
+        "index.ts"
     ],
     "exclude": [
         "node_modules",
