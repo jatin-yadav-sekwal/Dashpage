@@ -14,6 +14,6 @@ export default async function (request: Request, context: { waitUntil?: (promise
 }
 
 export const config = {
-  runtime: "nodejs20.x",
+  runtime: "nodejs18.x",
   maxDuration: 60,
 };
