@@ -23,6 +23,34 @@ const app = new Hono<{ Variables: Variables }>();
 app.use("*", secureHeaders());
 app.use("*", logger());
 
+// Explicit CORS preflight handler - must be before any routes
+app.options("*", (c) => {
+  const origin = c.req.header("Origin") || "";
+  const allowedOrigins = [
+    "https://dashpage-web.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+  ];
+  
+  const frontendUrl = process.env.FRONTEND_URL;
+  const corsOrigin = process.env.CORS_ORIGIN;
+  if (frontendUrl) allowedOrigins.push(frontendUrl);
+  if (corsOrigin) allowedOrigins.push(corsOrigin);
+  
+  const actualOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": actualOrigin || "*",
+      "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Credentials": "true",
+      "Access-Control-Max-Age": "600",
+    },
+  });
+});
+
 const ALLOWED_ORIGINS = [
   "https://dashpage-web.vercel.app",
   "http://localhost:5173",

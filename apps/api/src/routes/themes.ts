@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 import { themeService } from "../services/themeService";
-import type { Variables, Bindings, Env } from "../middleware/auth";
+import type { Variables, Env } from "../middleware/auth";
 import { authMiddleware } from "../middleware/auth";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { verify } from "hono/jwt";
 import { getSupabasePublicKey } from "../utils/jwks";
 
-const router = new Hono<{ Bindings: Bindings; Variables: Variables }>();
+const router = new Hono<{ Variables: Variables }>();
 
 router.get("/", async (c) => {
   const authHeader = c.req.header("Authorization");

@@ -4,7 +4,7 @@ import { paymentService } from "../services/paymentService";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 
-const router = new Hono<{ Bindings: Env["Bindings"]; Variables: Variables }>();
+const router = new Hono<{ Variables: Variables }>();
 
 const createOrderSchema = z.object({
   themeId: z.string().uuid()
