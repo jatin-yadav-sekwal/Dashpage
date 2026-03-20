@@ -8,13 +8,13 @@
         "node": "18.x"
     },
     "scripts": {
-        "dev": "bun run --watch index.ts",
+        "dev": "npx tsx watch index.ts",
         "build": "tsc",
-        "start": "bun run index.ts",
+        "start": "npx tsx index.ts",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "drizzle-kit migrate",
-        "db:seed": "bun run src/db/seed-themes.ts",
-        "storage:setup": "bun run scripts/setup-avatar-bucket.ts"
+        "db:seed": "npx tsx src/db/seed-themes.ts",
+        "storage:setup": "npx tsx scripts/setup-avatar-bucket.ts"
     },
     "dependencies": {
         "@hono/zod-validator": "^0.7.6",
@@ -26,9 +26,11 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
-        "@types/bun": "latest",
+        "@types/node": "^18",
+        "@vercel/node": "^3",
         "dotenv": "^17.2.3",
         "drizzle-kit": "^0.31.8",
+        "tsx": "^4",
         "typescript": "^5"
     },
     "peerDependencies": {

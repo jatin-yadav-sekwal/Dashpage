@@ -1,0 +1,14 @@
+# Cloudflare Workers artifacts
+.wrangler/
+
+# Dependencies & build
+node_modules/
+dist/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

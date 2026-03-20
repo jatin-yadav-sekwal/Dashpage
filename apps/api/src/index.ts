@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { secureHeaders } from "hono/secure-headers";
 import { logger } from "hono/logger";
-import { timing } from "hono/timing";
+// NOTE: hono/timing removed — it's a Cloudflare Server-Timing middleware
+// that adds overhead on Vercel's Node.js runtime without benefit.
 import profileRoutes from "./routes/profile";
 import experienceRoutes from "./routes/experiences";
 import educationRoutes from "./routes/educations";
@@ -14,23 +16,11 @@ import bookmarkRoutes from "./routes/bookmarks";
 import publicRoutes from "./routes/public";
 import type { Env } from "./middleware/auth";
 
+// Vercel uses process.env — no Cloudflare-style Bindings needed.
 type Variables = Env["Variables"];
 
-type Bindings = {
-  DATABASE_URL: string;
-  FRONTEND_URL: string;
-  CORS_ORIGIN: string;
-  RAZORPAY_KEY_ID: string;
-  RAZORPAY_KEY_SECRET: string;
-  RAZORPAY_WEBHOOK_SECRET: string;
-  SUPABASE_URL: string;
-  SUPABASE_JWKS_URL?: string;
-  SUPABASE_SERVICE_ROLE_KEY: string;
-};
-
-const app = new Hono<{ Variables: Variables; Bindings: Bindings }>();
-
-app.use("*", timing());
+const app = new Hono<{ Variables: Variables }>();
+app.use("*", secureHeaders());
 app.use("*", logger());
 
 const ALLOWED_ORIGINS = [
@@ -64,16 +54,41 @@ app.use(
   })
 );
 
+// ── Global Error Handler ───────────────────────────────────
+// Catches all errors thrown inside Hono route handlers.
+// Classifies errors and returns structured JSON responses.
 app.onError((err, c) => {
-  console.error("[API Error]", err.message);
-  return c.json({ 
-    error: err.message || "Internal Server Error",
-    requestId: c.req.header("X-Request-Id")
-  }, 500);
+  const method = c.req.method;
+  const path = new URL(c.req.url).pathname;
+  const requestId = c.req.header("X-Request-Id") || "none";
+
+  console.error("[API Error]", {
+    method,
+    path,
+    requestId,
+    error: err.message,
+    stack: err.stack,
+    timestamp: new Date().toISOString(),
+  });
+
+  // Classify known error types for proper HTTP status codes
+  const status = (err as any).status || 500;
+
+  return c.json(
+    {
+      error: status === 500 ? "Internal Server Error" : err.message,
+      code: status === 500 ? "INTERNAL_ERROR" : "REQUEST_ERROR",
+      requestId,
+    },
+    status
+  );
 });
 
+// ── 404 Handler ────────────────────────────────────────────
 app.notFound((c) => {
-  return c.json({ error: "Not Found" }, 404);
+  const path = new URL(c.req.url).pathname;
+  console.warn(`[API] 404 Not Found: ${c.req.method} ${path}`);
+  return c.json({ error: "Not Found", code: "NOT_FOUND", path }, 404);
 });
 
 app.get("/", (c) => c.json({ 

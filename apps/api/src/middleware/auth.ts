@@ -4,37 +4,43 @@ import { eq } from "drizzle-orm";
 import { verify } from "hono/jwt";
 import { getSupabasePublicKey } from "../utils/jwks";
 
+// ─────────────────────────────────────────────────────────────
+// Type Definitions
+// ─────────────────────────────────────────────────────────────
+// Simplified for Vercel deployment — all environment variables
+// are accessed via process.env, no Cloudflare-style Bindings.
+// ─────────────────────────────────────────────────────────────
+
 export type Env = {
   Variables: {
     userId: string;
     username: string | null;
     hasProfile: boolean;
   };
-  Bindings: {
-    DATABASE_URL: string;
-    FRONTEND_URL: string;
-    CORS_ORIGIN: string;
-    RAZORPAY_KEY_ID: string;
-    RAZORPAY_KEY_SECRET: string;
-    RAZORPAY_WEBHOOK_SECRET: string;
-    SUPABASE_URL: string;
-    SUPABASE_JWKS_URL?: string;
-    SUPABASE_SERVICE_ROLE_KEY: string;
-  };
 };
 
 export type Variables = Env["Variables"];
-export type Bindings = Env["Bindings"];
+
+// ─────────────────────────────────────────────────────────────
+// Auth Middleware
+// ─────────────────────────────────────────────────────────────
+// Validates Supabase JWTs via JWKS, extracts the user ID,
+// and attaches profile info to the Hono context.
+// ─────────────────────────────────────────────────────────────
 
 export const authMiddleware = createMiddleware<Env>(async (c, next) => {
   const authHeader = c.req.header("Authorization");
 
   if (!authHeader) {
     console.log("[Auth] No Authorization header");
-    return c.json({ error: "Unauthorized" }, 401);
+    return c.json({ error: "Unauthorized", code: "AUTH_NO_HEADER" }, 401);
   }
 
   const token = authHeader.replace("Bearer ", "").trim();
+
+  if (!token) {
+    return c.json({ error: "Unauthorized", code: "AUTH_EMPTY_TOKEN" }, 401);
+  }
 
   try {
     const publicKey = await getSupabasePublicKey(token);
@@ -44,7 +50,15 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
 
     if (!userId) {
       console.error("[Auth] No sub claim found in payload:", payload);
-      throw new Error("Invalid Token");
+      return c.json({ error: "Invalid token", code: "AUTH_NO_SUB" }, 401);
+    }
+
+    // Check token expiry
+    if (payload.exp && typeof payload.exp === "number") {
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      if (payload.exp < nowSeconds) {
+        return c.json({ error: "Token expired", code: "AUTH_EXPIRED" }, 401);
+      }
     }
 
     const { db } = await import("../db");
@@ -67,10 +81,20 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
 
     await next();
   } catch (err) {
-    console.error("JWT Verification Failed:", err);
-    if (err instanceof Error && err.message.includes("Invalid Token")) {
-      return c.json({ error: "Invalid Token" }, 401);
+    console.error("[Auth] JWT Verification Failed:", err);
+
+    if (err instanceof Error) {
+      if (err.message.includes("Invalid Token") || err.message.includes("invalid")) {
+        return c.json({ error: "Invalid token", code: "AUTH_INVALID_TOKEN" }, 401);
+      }
+      if (err.message.includes("expired") || err.message.includes("exp")) {
+        return c.json({ error: "Token expired", code: "AUTH_EXPIRED" }, 401);
+      }
+      if (err.message.includes("JWKS") || err.message.includes("fetch")) {
+        return c.json({ error: "Authentication service unavailable", code: "AUTH_SERVICE_ERROR" }, 503);
+      }
     }
-    return c.json({ error: "Authentication failed" }, 401);
+
+    return c.json({ error: "Authentication failed", code: "AUTH_FAILED" }, 401);
   }
 });
