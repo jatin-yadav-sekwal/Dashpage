@@ -29,6 +29,11 @@ export type Variables = Env["Variables"];
 // ─────────────────────────────────────────────────────────────
 
 export const authMiddleware = createMiddleware<Env>(async (c, next) => {
+  // Skip auth for OPTIONS preflight requests - let CORS middleware handle it
+  if (c.req.method === "OPTIONS") {
+    return next();
+  }
+
   const authHeader = c.req.header("Authorization");
 
   if (!authHeader) {
